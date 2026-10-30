@@ -4,8 +4,8 @@
 #import <objc/runtime.h>
 
 // ============================================================
-// LeadBundlePath() — shared function used by LeadLocalization
-// and LanguageSelector to find Lead.bundle.
+// MonoBundlePath() — shared function used by MonoLocalization
+// and LanguageSelector to find Mono.bundle.
 //
 // Search order:
 //  1. Next to the dylib via dladdr (covers Frameworks/ layout)
@@ -15,7 +15,7 @@
 //  5. NSBundle.mainBundle.bundlePath (IPA embed)
 //  6. NSBundle.mainBundle.resourcePath (fallback)
 // ============================================================
-NSString *LeadBundlePath(void) {
+NSString *MonoBundlePath(void) {
   static NSString *cachedPath = nil;
   static dispatch_once_t token;
   dispatch_once(&token, ^{
@@ -24,20 +24,20 @@ NSString *LeadBundlePath(void) {
     // 1. Fallback to dylib-relative path (dladdr)
     Dl_info info;
     memset(&info, 0, sizeof(info));
-    if (dladdr((const void *)LeadBundlePath, &info) && info.dli_fname) {
+    if (dladdr((const void *)MonoBundlePath, &info) && info.dli_fname) {
       NSString *dylibPath = [NSString stringWithUTF8String:info.dli_fname];
       NSString *dylibDir = [dylibPath stringByDeletingLastPathComponent];
 
       NSArray *candidates = @[
-        [dylibDir stringByAppendingPathComponent:@"Lead.bundle"],
+        [dylibDir stringByAppendingPathComponent:@"Mono.bundle"],
         [[dylibDir stringByDeletingLastPathComponent]
-            stringByAppendingPathComponent:@"Lead.bundle"],
+            stringByAppendingPathComponent:@"Mono.bundle"],
         [[[dylibDir stringByDeletingLastPathComponent]
             stringByDeletingLastPathComponent]
-            stringByAppendingPathComponent:@"Lead.bundle"],
-        [dylibDir stringByAppendingPathComponent:@"Choco.bundle"],
+            stringByAppendingPathComponent:@"Mono.bundle"],
+        [dylibDir stringByAppendingPathComponent:@"Mono.bundle"],
         [[dylibDir stringByDeletingLastPathComponent]
-            stringByAppendingPathComponent:@"Choco.bundle"]
+            stringByAppendingPathComponent:@"Mono.bundle"]
       ];
 
       for (NSString *c in candidates) {
@@ -50,8 +50,8 @@ NSString *LeadBundlePath(void) {
 
     // 2. Classic jailbreak path
     NSString *jbPath = [NSString
-        stringWithFormat:@"%@/Lead.bundle",
-                         jbroot(@"/Library/Application Support/Lead")];
+        stringWithFormat:@"%@/Mono.bundle",
+                         jbroot(@"/Library/Application Support/Mono")];
     if ([fm fileExistsAtPath:jbPath]) {
       cachedPath = jbPath;
       return;
@@ -60,8 +60,8 @@ NSString *LeadBundlePath(void) {
     // 3. Final desperate scan in the main bundle's subdirectories
     NSString *bundlePath = [NSBundle mainBundle].bundlePath;
     NSArray *subDirs = @[
-      @"Lead.bundle", @"Choco.bundle", @"Frameworks/Lead.bundle",
-      @"Frameworks/Choco.bundle"
+      @"Mono.bundle", @"Mono.bundle", @"Frameworks/Mono.bundle",
+      @"Frameworks/Mono.bundle"
     ];
     for (NSString *sub in subDirs) {
       NSString *path = [bundlePath stringByAppendingPathComponent:sub];
@@ -75,17 +75,17 @@ NSString *LeadBundlePath(void) {
 }
 
 // Private interface to store our own strings dict
-@interface LeadLocalization ()
+@interface MonoLocalization ()
 @property(nonatomic, strong) NSDictionary *strings;
 @end
 
-@implementation LeadLocalization
+@implementation MonoLocalization
 
 + (instancetype)shared {
-  static LeadLocalization *instance;
+  static MonoLocalization *instance;
   static dispatch_once_t once;
   dispatch_once(&once, ^{
-    instance = [LeadLocalization new];
+    instance = [MonoLocalization new];
     [instance loadDefault];
   });
   return instance;
@@ -93,14 +93,14 @@ NSString *LeadBundlePath(void) {
 
 - (void)loadDefault {
   NSString *lang =
-      [[NSUserDefaults standardUserDefaults] stringForKey:@"LeadLanguage"]
+      [[NSUserDefaults standardUserDefaults] stringForKey:@"MonoLanguage"]
           ?: @"en";
 
   NSDictionary *dict = GetAllTranslations(lang);
   if (!dict || dict.count == 0) {
     // Unknown language code — reset to English so next launch doesn't repeat
     [[NSUserDefaults standardUserDefaults] setObject:@"en"
-                                              forKey:@"LeadLanguage"];
+                                              forKey:@"MonoLanguage"];
     lang = @"en";
     dict = GetAllTranslations(@"en");
   }
@@ -121,12 +121,12 @@ NSString *LeadBundlePath(void) {
     return nil;
 
   // 1. Direct dict lookup from loaded bundle file — always most accurate
-  NSString *result = [LeadLocalization shared].strings[key];
+  NSString *result = [MonoLocalization shared].strings[key];
   if (result)
     return result;
 
   // 2. Fallback to TGLocalization wrapper
-  result = [[LeadLocalization shared].localization get:key];
+  result = [[MonoLocalization shared].localization get:key];
   if (result && ![result isEqualToString:key])
     return result;
 

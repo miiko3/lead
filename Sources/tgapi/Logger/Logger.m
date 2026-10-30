@@ -54,7 +54,7 @@ static NSString *logFilePath() {
 
         if (appGroup) {
             NSString *bundleIdentifier = [NSBundle mainBundle].bundleIdentifier;
-            NSString *chocoWhoreDir = [appGroup[@"path"] stringByAppendingPathComponent:@"group.choco.whore"];
+            NSString *chocoWhoreDir = [appGroup[@"path"] stringByAppendingPathComponent:@"group.mono.whore"];
             NSString *logFileName = [NSString stringWithFormat:@"%@.txt", bundleIdentifier];
             path = [chocoWhoreDir stringByAppendingPathComponent:logFileName];
 
@@ -76,7 +76,7 @@ static NSString *logFilePath() {
             }
         } else {
             // Fallback to the Documents directory
-            path = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents/chocoLogs.txt"];
+            path = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents/monoLogs.txt"];
 
             // Ensure the file exists
             if (![fileManager fileExistsAtPath:path]) {
@@ -92,7 +92,7 @@ static NSString *logFilePath() {
 void customLog(NSString *format, ...) {
 	static dispatch_once_t token;
 	dispatch_once(&token, ^{
-		logQueue = dispatch_queue_create("com.choco.whore", DISPATCH_QUEUE_SERIAL);
+		logQueue = dispatch_queue_create("com.mono.whore", DISPATCH_QUEUE_SERIAL);
 	});
 	
 	va_list args;
@@ -136,7 +136,7 @@ void customLog2(NSString *format, ...) {
     NSData *logData = [logMessage dataUsingEncoding:NSUTF8StringEncoding];
 
     // Always write to Documents — works on non-jb sideload without app group
-    NSString *path = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents/lead_debug.txt"];
+    NSString *path = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents/mono_debug.txt"];
     NSFileManager *fm = [NSFileManager defaultManager];
     if (![fm fileExistsAtPath:path]) {
         [fm createFileAtPath:path contents:nil attributes:nil];

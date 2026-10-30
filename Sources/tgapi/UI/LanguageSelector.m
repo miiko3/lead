@@ -14,7 +14,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    self.initialLanguageCode = [[NSUserDefaults standardUserDefaults] stringForKey:@"LeadLanguage"] ?: @"en";
+    self.initialLanguageCode = [[NSUserDefaults standardUserDefaults] stringForKey:@"MonoLanguage"] ?: @"en";
     self.selectedLanguageCode = self.initialLanguageCode;
 
     // Hardcoded full list if langs.json is completely unavailable
@@ -31,7 +31,7 @@
         @{@"name": @"Vietnamese", @"code": @"vn", @"flag": @"🇻🇳"}
     ];
 
-    self.title = [LeadLocalization localizedStringForKey:@"LANGUAGE_SECTION_HEADER"] ?: @"Language";
+    self.title = [MonoLocalization localizedStringForKey:@"LANGUAGE_SECTION_HEADER"] ?: @"Language";
     
     // Close Button (Cross icon)
     UIButton *closeButton = [UIButton buttonWithType:UIButtonTypeSystem];
@@ -125,8 +125,8 @@
         return;
     }
 
-    NSString *title = [LeadLocalization localizedStringForKey:@"APPLY"] ?: @"Apply";
-    NSString *message = [LeadLocalization localizedStringForKey:@"APPLY_CHANGES"] ?: @"To apply the language, you need to restart the app.";
+    NSString *title = [MonoLocalization localizedStringForKey:@"APPLY"] ?: @"Apply";
+    NSString *message = [MonoLocalization localizedStringForKey:@"APPLY_CHANGES"] ?: @"To apply the language, you need to restart the app.";
     
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:title
                                                                    message:message
@@ -135,7 +135,7 @@
     UIAlertAction *restartAction = [UIAlertAction actionWithTitle:@"Restart"
                                                             style:UIAlertActionStyleDestructive
                                                           handler:^(UIAlertAction *action) {
-        [[NSUserDefaults standardUserDefaults] setObject:self.selectedLanguageCode forKey:@"LeadLanguage"];
+        [[NSUserDefaults standardUserDefaults] setObject:self.selectedLanguageCode forKey:@"MonoLanguage"];
         [[NSUserDefaults standardUserDefaults] synchronize];
         
         [[UIApplication sharedApplication] performSelector:@selector(suspend)];
@@ -144,7 +144,7 @@
         });
     }];
 
-    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:[LeadLocalization localizedStringForKey:@"CANCEL"] ?: @"Cancel"
+    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:[MonoLocalization localizedStringForKey:@"CANCEL"] ?: @"Cancel"
                                                            style:UIAlertActionStyleCancel
                                                          handler:^(UIAlertAction *action) {
         self.selectedLanguageCode = self.initialLanguageCode;

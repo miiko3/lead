@@ -253,7 +253,7 @@ static NSData *neutralizePayload(NSData *data, BOOL antiRevoke,
               if (deletedIdsArr.count > 0) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                   [[NSNotificationCenter defaultCenter]
-                      postNotificationName:@"LeadMessageDeletedRealtime"
+                      postNotificationName:@"MonoMessageDeletedRealtime"
                                     object:nil
                                   userInfo:@{@"ids" : deletedIdsArr}];
                 });
@@ -301,7 +301,7 @@ static NSData *neutralizePayload(NSData *data, BOOL antiRevoke,
               if (deletedIdsArr.count > 0) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                   [[NSNotificationCenter defaultCenter]
-                      postNotificationName:@"LeadMessageDeletedRealtime"
+                      postNotificationName:@"MonoMessageDeletedRealtime"
                                     object:nil
                                   userInfo:@{@"ids" : deletedIdsArr}];
                 });
@@ -342,7 +342,7 @@ static NSData *neutralizePayload(NSData *data, BOOL antiRevoke,
   if (data && data.length >= 4) {
     int32_t ctor = 0;
     memcpy(&ctor, data.bytes, 4);
-    // customLog2(@"[Lead] parseMessage: len=%lu ctor=0x%08X", (unsigned
+    // customLog2(@"[Mono] parseMessage: len=%lu ctor=0x%08X", (unsigned
     // long)data.length, (uint32_t)ctor);
 
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -354,7 +354,7 @@ static NSData *neutralizePayload(NSData *data, BOOL antiRevoke,
       NSData *modifiedData = neutralizePayload(
           data, antiRevoke, antiSelfDestruct);
       if (modifiedData) {
-        customLog2(@"[Lead] parseMessage: NEUTRALIZED (antiRevoke=%d "
+        customLog2(@"[Mono] parseMessage: NEUTRALIZED (antiRevoke=%d "
                    @"antiSelfDestruct=%d)",
                    antiRevoke, antiSelfDestruct);
         data = modifiedData;
@@ -390,7 +390,7 @@ static NSData *neutralizePayload(NSData *data, BOOL antiRevoke,
       NSData *strippedData =
           [NSClassFromString(@"TLParser") stripAntiSelfDestruct:uncompressed];
       if (strippedData) {
-        customLog2(@"[Lead] parseMessage: STRIPPED SELF-DESTRUCT");
+        customLog2(@"[Mono] parseMessage: STRIPPED SELF-DESTRUCT");
         data = strippedData;
         modified = YES;
       }

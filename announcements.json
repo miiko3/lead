@@ -1,9 +1,9 @@
 [
   {
-    "title": "Lead 1.4.3 is ready!",
-    "message": "• Fixed: False \"edited\" badge appearing on reactions and normal sends\n• Fixed: Anti-Revoke not working in groups and channels\n• Fixed: One-time media badge reverting to normal after leaving and re-entering a chat\n• Updated hooks for the latest Telegram version",
+    "title": "Mono 1.0.0 is here!",
+    "message": "Mono is a rebranded, refreshed build of the tweak. All features from before are included: Anti-Self-Destruct, Anti-Revoke, Ghost Mode, Anti-Edit and more. Report any issues on our channel.",
     "type": "update",
-    "url": "https://t.me/Leadgramm/74",
-    "target_version": "1.4.3"
+    "url": "https://t.me/Leadgramm",
+    "target_version": "1.0.0"
   }
 ]

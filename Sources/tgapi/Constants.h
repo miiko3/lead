@@ -35,8 +35,8 @@
 #define kActionIDEmojiAcknowledgement                                          \
   -1234857938 // .sendMessageEmojiInteractionSeen
 
-#define kGhostModeEnabled @"LeadGhostModeEnabled"
-#define kGhostDetailsToggle @"LeadGhostDetailsToggle"
+#define kGhostModeEnabled @"MonoGhostModeEnabled"
+#define kGhostDetailsToggle @"MonoGhostDetailsToggle"
 #define kDisableOnlineStatus @"disableOnlineStatus"
 
 #define kDisableTypingStatus @"disableTypingStatus"
@@ -65,24 +65,24 @@
 #define kDisableForwardRestriction @"disableForwardRestriction"
 
 // Anti-features
-#define kAntiRevoke @"LeadAntiRevoke"
-#define kAntiEdit @"LeadAntiEdit"
+#define kAntiRevoke @"MonoAntiRevoke"
+#define kAntiEdit @"MonoAntiEdit"
 // Key for preventing disappearing/self-destruct media from being marked as read
-#define kAntiSelfDestruct @"LeadAntiSelfDestruct"
-#define kAntiAutoDelete @"LeadAntiAutoDelete"
-#define kConfirmCalls @"LeadConfirmCalls"
-#define kHideStories @"LeadHideStories"
-#define kDownloadStories @"LeadDownloadStories"
+#define kAntiSelfDestruct @"MonoAntiSelfDestruct"
+#define kAntiAutoDelete @"MonoAntiAutoDelete"
+#define kConfirmCalls @"MonoConfirmCalls"
+#define kHideStories @"MonoHideStories"
+#define kDownloadStories @"MonoDownloadStories"
 
-#define FAKE_LOCATION_ENABLED_KEY @"LeadFakeLocation"
-#define FAKE_LATITUDE_KEY @"LeadSavedLatitude"
-#define FAKE_LONGITUDE_KEY @"LeadSavedLongitude"
+#define FAKE_LOCATION_ENABLED_KEY @"MonoFakeLocation"
+#define FAKE_LATITUDE_KEY @"MonoSavedLatitude"
+#define FAKE_LONGITUDE_KEY @"MonoSavedLongitude"
 
-#define FILE_PICKER_FIX_KEY @"LeadFixFilePicker"
-#define FILE_PICKER_PATH @"LeadFileFixUsingSomeUglyHacks"
+#define FILE_PICKER_FIX_KEY @"MonoFixFilePicker"
+#define FILE_PICKER_PATH @"MonoFileFixUsingSomeUglyHacks"
 
 // Download speed boost: 0 = off, 1 = medium (512KB/8 parts), 2 = maximum (1MB/12 parts)
-#define kDownloadSpeedBoost @"LeadDownloadSpeedBoost"
+#define kDownloadSpeedBoost @"MonoDownloadSpeedBoost"
 
 // Send audio/video files as voice messages
-#define kSendAsVoice @"LeadSendAsVoice"
+#define kSendAsVoice @"MonoSendAsVoice"

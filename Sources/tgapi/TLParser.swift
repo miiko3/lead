@@ -6,10 +6,10 @@ class TLParser: NSObject {
     @objc static var sharedContext: Any?
 
     // Thread-safe set of message IDs saved from deletion.
-    private static let deletedQueue = DispatchQueue(label: "com.lead.deletedIds",
+    private static let deletedQueue = DispatchQueue(label: "com.mono.deletedIds",
                                                     attributes: .concurrent)
     private static var _deletedIds = Set<Int32>()
-    private static let udKey = "LeadDeletedMsgIds"
+    private static let udKey = "MonoDeletedMsgIds"
     private static var _loaded = false
     private static var protectedChannelIds = Set<Int64>()
 
@@ -305,7 +305,7 @@ class TLParser: NSObject {
                 }
             }
         }
-        let savedId = UserDefaults.standard.integer(forKey: "LeadLastKnownUserId")
+        let savedId = UserDefaults.standard.integer(forKey: "MonoLastKnownUserId")
         if savedId != 0 { return NSNumber(value: Int64(savedId)) }
         return nil
     }
@@ -363,7 +363,7 @@ class TLParser: NSObject {
     }
 
     private static func stripTTLMedia(_ media: Api.MessageMedia, messageId: Int32) -> Api.MessageMedia {
-        guard UserDefaults.standard.bool(forKey: "LeadAntiSelfDestruct") else { return media }
+        guard UserDefaults.standard.bool(forKey: "MonoAntiSelfDestruct") else { return media }
         switch media {
         case let .messageMediaPhoto(data):
             if data.ttlSeconds != nil || (Int(data.flags) & Int(1 << 2)) != 0 {
@@ -384,8 +384,8 @@ class TLParser: NSObject {
 
     private static func stripNoForwards(_ chat: Api.Chat) -> (Api.Chat, Bool) {
         guard UserDefaults.standard.bool(forKey: "disableForwardRestriction") ||
-              UserDefaults.standard.bool(forKey: "LeadAntiSelfDestruct") ||
-              UserDefaults.standard.bool(forKey: "LeadAntiAutoDelete") else { return (chat, false) }
+              UserDefaults.standard.bool(forKey: "MonoAntiSelfDestruct") ||
+              UserDefaults.standard.bool(forKey: "MonoAntiAutoDelete") else { return (chat, false) }
               
         switch chat {
         case let .channel(data):
@@ -446,8 +446,8 @@ class TLParser: NSObject {
     
     private static func stripNoForwardsFromFullChat(_ chatFull: Api.ChatFull) -> (Api.ChatFull, Bool) {
         guard UserDefaults.standard.bool(forKey: "disableForwardRestriction") ||
-              UserDefaults.standard.bool(forKey: "LeadAntiSelfDestruct") ||
-              UserDefaults.standard.bool(forKey: "LeadAntiAutoDelete") else { return (chatFull, false) }
+              UserDefaults.standard.bool(forKey: "MonoAntiSelfDestruct") ||
+              UserDefaults.standard.bool(forKey: "MonoAntiAutoDelete") else { return (chatFull, false) }
               
         switch chatFull {
         case let .channelFull(data):
@@ -555,7 +555,7 @@ class TLParser: NSObject {
 
     private static func stripTTLMessage(_ apiMsg: Api.Message) -> (Api.Message, Bool) {
         guard UserDefaults.standard.bool(forKey: "disableForwardRestriction") || 
-              UserDefaults.standard.bool(forKey: "LeadAntiSelfDestruct") else { return (apiMsg, false) }
+              UserDefaults.standard.bool(forKey: "MonoAntiSelfDestruct") else { return (apiMsg, false) }
         guard case let .message(data) = apiMsg else {
             return (apiMsg, false)
         }
@@ -578,7 +578,7 @@ class TLParser: NSObject {
         
         // Strip noforwards if requested
         if UserDefaults.standard.bool(forKey: "disableForwardRestriction") || 
-           UserDefaults.standard.bool(forKey: "LeadAntiSelfDestruct") {
+           UserDefaults.standard.bool(forKey: "MonoAntiSelfDestruct") {
             // Bit 14 is standard, bit 26 is used in neutralizePayload
             let mask: Int32 = ~( (1 << 14) | (1 << 26) )
             newFlags &= mask
@@ -647,7 +647,7 @@ class TLParser: NSObject {
     }
 
     @objc static func stripAntiSelfDestruct(_ data: NSData) -> NSData? {
-        let isAntiSelfDestruct = UserDefaults.standard.bool(forKey: "LeadAntiSelfDestruct")
+        let isAntiSelfDestruct = UserDefaults.standard.bool(forKey: "MonoAntiSelfDestruct")
         let isNoForwardsBypass = UserDefaults.standard.bool(forKey: "disableForwardRestriction")
         
         guard isAntiSelfDestruct || isNoForwardsBypass else { return nil }
@@ -722,7 +722,7 @@ class TLParser: NSObject {
                 // pересериализацию обычных сообщений и ломало rich notifications.
                 let hasNoForwards = (Int(data.flags) & (1 << 14)) != 0 || (Int(data.flags) & (1 << 26)) != 0
                 if hasNoForwards && (UserDefaults.standard.bool(forKey: "disableForwardRestriction") ||
-                   UserDefaults.standard.bool(forKey: "LeadAntiSelfDestruct")) {
+                   UserDefaults.standard.bool(forKey: "MonoAntiSelfDestruct")) {
                     newFlags &= ~(1 << 14)
                     newFlags &= ~(1 << 26)
                 }
@@ -751,7 +751,7 @@ class TLParser: NSObject {
                 // Only clear noforwards flags if they are actually set
                 let hasNoForwardsChatMsg = (Int(data.flags) & (1 << 14)) != 0 || (Int(data.flags) & (1 << 26)) != 0
                 if hasNoForwardsChatMsg && (UserDefaults.standard.bool(forKey: "disableForwardRestriction") ||
-                   UserDefaults.standard.bool(forKey: "LeadAntiSelfDestruct")) {
+                   UserDefaults.standard.bool(forKey: "MonoAntiSelfDestruct")) {
                     newFlags &= ~(1 << 14)
                     newFlags &= ~(1 << 26)
                 }
@@ -907,16 +907,16 @@ class TLParser: NSObject {
         let buffer = Buffer(data: data as Data)
         let reader = BufferReader(buffer)
         guard let signature = reader.readInt32() else { 
-            NSLog("[Lead] parseForwardRequest: Failed to read signature")
+            NSLog("[Mono] parseForwardRequest: Failed to read signature")
             return nil 
         }
         
         if signature != 326126204 {
-            // NSLog("[Lead] parseForwardRequest: Unexpected signature %d", signature)
+            // NSLog("[Mono] parseForwardRequest: Unexpected signature %d", signature)
             return nil
         }
         
-        NSLog("[Lead] parseForwardRequest: Detected forwardMessages")
+        NSLog("[Mono] parseForwardRequest: Detected forwardMessages")
         
         let _ = reader.readInt32() ?? 0
         
@@ -942,8 +942,8 @@ class TLParser: NSObject {
               let toPeer = Api.parse(reader, signature: toSig) as? Api.InputPeer else { return nil }
         
         switch toPeer {
-        case let .inputPeerUser(data): NSLog("[Lead]   Target User: id=%lld, hash=%lld", data.userId, data.accessHash)
-        case let .inputPeerChannel(data): NSLog("[Lead]   Target Channel: id=%lld, hash=%lld", data.channelId, data.accessHash)
+        case let .inputPeerUser(data): NSLog("[Mono]   Target User: id=%lld, hash=%lld", data.userId, data.accessHash)
+        case let .inputPeerChannel(data): NSLog("[Mono]   Target Channel: id=%lld, hash=%lld", data.channelId, data.accessHash)
         default: break
         }
               
@@ -952,9 +952,9 @@ class TLParser: NSObject {
 
     @objc(handleForwardRequest:)
     static func handleForwardRequest(_ data: NSData) -> Bool {
-        NSLog("[Lead] handleForwardRequest called")
+        NSLog("[Mono] handleForwardRequest called")
         guard let request = parseForwardRequest(data) else { 
-            NSLog("[Lead] handleForwardRequest: Failed to parse forward request")
+            NSLog("[Mono] handleForwardRequest: Failed to parse forward request")
             return false 
         }
         
@@ -966,7 +966,7 @@ class TLParser: NSObject {
         default: fromId = 0
         }
         
-        NSLog("[Lead] handleForwardRequest: fromId = \(fromId)")
+        NSLog("[Mono] handleForwardRequest: fromId = \(fromId)")
         // For now, if the setting is ON, we hijack ALL forwards from channels or chats to be safe.
         return fromId != 0
     }
@@ -990,7 +990,7 @@ class TLParser: NSObject {
     @objc(createSendMediaRequests:originalForwardData:)
     static func createSendMediaRequests(_ response: Any, originalForwardData: NSData) -> [NSData] {
         guard let messagesResponse = response as? Api.messages.Messages else { 
-            NSLog("[Lead] Failed to cast response to Api.messages.Messages")
+            NSLog("[Mono] Failed to cast response to Api.messages.Messages")
             return [] 
         }
         
@@ -1004,7 +1004,7 @@ class TLParser: NSObject {
         default: break
         }
         
-        NSLog("[Lead] Cloning %d messages", messages.count)
+        NSLog("[Mono] Cloning %d messages", messages.count)
         
         return messages.compactMap { msg -> NSData? in
             guard case let .message(data) = msg else { return nil }
@@ -1014,17 +1014,17 @@ class TLParser: NSObject {
                 switch media {
                 case let .messageMediaPhoto(m):
                     if let photo = m.photo, case let .photo(p) = photo {
-                        NSLog("[Lead]   Detected Photo: id=%lld, accessHash=%lld, refLen=%d", p.id, p.accessHash, p.fileReference.size)
+                        NSLog("[Mono]   Detected Photo: id=%lld, accessHash=%lld, refLen=%d", p.id, p.accessHash, p.fileReference.size)
                         inputMedia = .inputMediaPhoto(Api.InputMedia.Cons_inputMediaPhoto(flags: 0, id: .inputPhoto(Api.InputPhoto.Cons_inputPhoto(id: p.id, accessHash: p.accessHash, fileReference: p.fileReference)), ttlSeconds: nil, video: nil))
                     } else {
-                        NSLog("[Lead]   Photo media but photo is empty")
+                        NSLog("[Mono]   Photo media but photo is empty")
                     }
                 case let .messageMediaDocument(m):
                     if let document = m.document, case let .document(d) = document {
-                        NSLog("[Lead]   Detected Document: id=%lld, accessHash=%lld, refLen=%d", d.id, d.accessHash, d.fileReference.size)
+                        NSLog("[Mono]   Detected Document: id=%lld, accessHash=%lld, refLen=%d", d.id, d.accessHash, d.fileReference.size)
                         inputMedia = .inputMediaDocument(Api.InputMedia.Cons_inputMediaDocument(flags: 0, id: .inputDocument(Api.InputDocument.Cons_inputDocument(id: d.id, accessHash: d.accessHash, fileReference: d.fileReference)), videoCover: nil, videoTimestamp: nil, ttlSeconds: nil, query: nil))
                     } else {
-                        NSLog("[Lead]   Document media but document is empty")
+                        NSLog("[Mono]   Document media but document is empty")
                     }
                 case let .messageMediaGeo(m):
                     if case let .geoPoint(gp) = m.geo {
@@ -1037,14 +1037,14 @@ class TLParser: NSObject {
                         inputMedia = .inputMediaVenue(Api.InputMedia.Cons_inputMediaVenue(geoPoint: .inputGeoPoint(Api.InputGeoPoint.Cons_inputGeoPoint(flags: 0, lat: gp.lat, long: gp.long, accuracyRadius: nil)), title: m.title, address: m.address, provider: m.provider, venueId: m.venueId, venueType: m.venueType))
                     }
                 case .messageMediaWebPage(_):
-                    NSLog("[Lead]   Detected WebPage, sending as text fallback")
+                    NSLog("[Mono]   Detected WebPage, sending as text fallback")
                     inputMedia = nil
                 default:
-                    NSLog("[Lead]   Unsupported media type: \(String(describing: media))")
+                    NSLog("[Mono]   Unsupported media type: \(String(describing: media))")
                     inputMedia = nil
                 }
             } else {
-                NSLog("[Lead]   No media in message")
+                NSLog("[Mono]   No media in message")
             }
             
             var flags: Int32 = 0x80
@@ -1069,7 +1069,7 @@ class TLParser: NSObject {
                 // 3. Media
                 im.serialize(buffer, true)
                 
-                NSLog("[Lead]   Created NATIVE-ALIGNED sendMedia payload (len: %d)", buffer.size)
+                NSLog("[Mono]   Created NATIVE-ALIGNED sendMedia payload (len: %d)", buffer.size)
                 return buffer.makeData() as NSData
             } else {
                 // Send as text only if no media or media not supported
@@ -1089,7 +1089,7 @@ class TLParser: NSObject {
                     allowPaidStars: nil, 
                     suggestedPost: nil
                 )
-                NSLog("[Lead]   Created sendMessage payload (len: %d)", sendMessage.1.size)
+                NSLog("[Mono]   Created sendMessage payload (len: %d)", sendMessage.1.size)
                 return sendMessage.1.makeData() as NSData
             }
         }
@@ -1101,12 +1101,12 @@ class TLParser: NSObject {
         if workingData.count >= 4 {
             let signature = workingData.withUnsafeBytes { $0.load(as: UInt32.self) }
             if signature == 0x3072CFA1 { // gzip_packed
-                NSLog("[Lead] parseMessagesResponse: Detected GZIP, decompressing...")
+                NSLog("[Mono] parseMessagesResponse: Detected GZIP, decompressing...")
                 if let decompressed = decompressGzip(workingData.withUnsafeBytes { $0.baseAddress?.advanced(by: 4) }, workingData.count - 4) {
                     workingData = decompressed as Data
-                    NSLog("[Lead] parseMessagesResponse: GZIP decompressed success (new len: \(workingData.count))")
+                    NSLog("[Mono] parseMessagesResponse: GZIP decompressed success (new len: \(workingData.count))")
                 } else {
-                    NSLog("[Lead] parseMessagesResponse: GZIP decompression FAILED")
+                    NSLog("[Mono] parseMessagesResponse: GZIP decompression FAILED")
                 }
             }
         }
@@ -1114,7 +1114,7 @@ class TLParser: NSObject {
         let buffer = Buffer(data: workingData)
         let reader = BufferReader(buffer)
         guard let signature = reader.readInt32() else { 
-            NSLog("[Lead] parseMessagesResponse: Failed to read signature")
+            NSLog("[Mono] parseMessagesResponse: Failed to read signature")
             return nil 
         }
         return Api.parse(reader, signature: signature)

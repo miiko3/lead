@@ -6,7 +6,7 @@
 #import <roothide.h>
 #import "../Constants.h"
 
-@interface Lead : UIViewController <UITableViewDataSource, UITableViewDelegate>
+@interface Mono : UIViewController <UITableViewDataSource, UITableViewDelegate>
 @end
 
 @interface TGLocalization : NSObject
@@ -14,16 +14,16 @@
 - (id)initWithVersion:(int)a code:(id)b dict:(id)c isActive:(BOOL)d;
 @end
 
-@interface LeadLocalization  : NSObject
+@interface MonoLocalization  : NSObject
 @property (nonatomic, strong ) TGLocalization *localization;
 + (instancetype)shared;
 + (NSString *)localizedStringForKey:(NSString *)key;
 @end
 
-// Returns the path to Lead.bundle regardless of installation method.
+// Returns the path to Mono.bundle regardless of installation method.
 // Works on jailbreak, SwiftGram, AltStore, and any sideloaded IPA.
-// Both LeadLocalization and LanguageSelector must use this function.
-NSString *LeadBundlePath(void);
+// Both MonoLocalization and LanguageSelector must use this function.
+NSString *MonoBundlePath(void);
 
 
 @interface LanguageSelector : UIViewController <UITableViewDataSource, UITableViewDelegate>
@@ -32,7 +32,7 @@ NSString *LeadBundlePath(void);
 @interface DonateViewController : UIViewController <UITableViewDataSource, UITableViewDelegate>
 @end
 
-@interface LeadDownloadBoost : NSObject
+@interface MonoDownloadBoost : NSObject
 + (void)install;
 @end
 

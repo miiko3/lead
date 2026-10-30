@@ -108,7 +108,7 @@ void showUI();
     if (![[NSUserDefaults standardUserDefaults] boolForKey:kSendAsVoice]) {
         return %orig;
     }
-    if (%orig) return YES;
+    if (%orig) { return YES; }
     NSString *mime = [self mimeType];
     if ([mime hasPrefix:@"audio/"]) {
         return YES;
@@ -139,23 +139,23 @@ void showUI();
 static BOOL _leadGestureAttached = NO;
 
 // Helper target object for late-attached gestures
-@interface LeadGestureTarget : NSObject
+@interface MonoGestureTarget : NSObject
 @end
-@implementation LeadGestureTarget
+@implementation MonoGestureTarget
 - (void)handleLongPress:(UILongPressGestureRecognizer *)gr {
     if (gr.state == UIGestureRecognizerStateBegan) showUI();
 }
 @end
-static LeadGestureTarget *_leadGestureTarget = nil;
+static MonoGestureTarget *_leadGestureTarget = nil;
 
-static void tryAttachLeadGesture(void);
+static void tryAttachMonoGesture(void);
 
 %hook TGLocalization
 - (id)get:(id)key {
     TGLocalizationShared = self;
     if (!_leadGestureAttached) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            tryAttachLeadGesture();
+            tryAttachMonoGesture();
         });
     }
     return %orig;
@@ -168,7 +168,7 @@ static void tryAttachLeadGesture(void);
         // Settings may already be rendered — try to attach gesture now
         if (!_leadGestureAttached) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                tryAttachLeadGesture();
+                tryAttachMonoGesture();
             });
         }
     }
@@ -176,7 +176,7 @@ static void tryAttachLeadGesture(void);
 }
 %end
 
-static void tryAttachLeadGestureInView(UIView *view) {
+static void tryAttachMonoGestureInView(UIView *view) {
     if (!view) return;
     if ([NSStringFromClass([view class]) isEqualToString:@"Display.AccessibilityAreaNode"]) {
         NSString *label = view.accessibilityLabel;
@@ -194,12 +194,12 @@ static void tryAttachLeadGestureInView(UIView *view) {
                         }
                     }
                     if (!alreadyHas) {
-                        if (!_leadGestureTarget) _leadGestureTarget = [LeadGestureTarget new];
+                        if (!_leadGestureTarget) _leadGestureTarget = [MonoGestureTarget new];
                         UILongPressGestureRecognizer *gr = [[UILongPressGestureRecognizer alloc]
                             initWithTarget:_leadGestureTarget action:@selector(handleLongPress:)];
                         [parent addGestureRecognizer:gr];
                         _leadGestureAttached = YES;
-                        customLog2(@"[Lead] late-attach OK: %@", label);
+                        customLog2(@"[Mono] late-attach OK: %@", label);
                     }
                 }
             }
@@ -207,19 +207,19 @@ static void tryAttachLeadGestureInView(UIView *view) {
         return;
     }
     for (UIView *sub in view.subviews) {
-        tryAttachLeadGestureInView(sub);
+        tryAttachMonoGestureInView(sub);
         if (_leadGestureAttached) return;
     }
 }
 
-static void tryAttachLeadGesture(void) {
+static void tryAttachMonoGesture(void) {
     if (_leadGestureAttached) return;
     UIWindow *window = UIApplication.sharedApplication.keyWindow;
-    if (window) tryAttachLeadGestureInView(window);
+    if (window) tryAttachMonoGestureInView(window);
 }
 
 void showUI() {
-	Lead *ui = [Lead new];
+	Mono *ui = [Mono new];
 	UINavigationController *navVC = [[UINavigationController alloc] initWithRootViewController:ui];
 
 	UIWindow *window = UIApplication.sharedApplication.keyWindow;
@@ -232,7 +232,7 @@ void showUI() {
 
 
 // ============================================================
-// Long-press to open Lead menu on "Ask a Question" row.
+// Long-press to open Mono menu on "Ask a Question" row.
 //
 // Root cause of the language bug: didEnterHierarchy fires BEFORE
 // update() sets accessibilityLabel, so the label is always empty
@@ -286,25 +286,25 @@ void showUI() {
     }
 
     if (!isSupportRow) {
-        customLog2(@"[Lead] unmatched label: %@", label);
+        customLog2(@"[Mono] unmatched label: %@", label);
         return;
     }
 
     if (!parent.leadLongPressGesture) {
         parent.leadLongPressGesture = [[UILongPressGestureRecognizer alloc]
             initWithTarget:parent
-                    action:@selector(__handleLeadLongPress:)];
+                    action:@selector(__handleMonoLongPress:)];
     }
 
     UIView *pv = parent.view;
     if (pv && ![pv.gestureRecognizers containsObject:parent.leadLongPressGesture]) {
         [pv addGestureRecognizer:parent.leadLongPressGesture];
-        customLog2(@"[Lead] gesture attached: %@", label);
+        customLog2(@"[Mono] gesture attached: %@", label);
     }
 }
 
 %new
-- (void)__handleLeadLongPress:(UILongPressGestureRecognizer *)gesture {
+- (void)__handleMonoLongPress:(UILongPressGestureRecognizer *)gesture {
     if (gesture.state == UIGestureRecognizerStateBegan) {
         showUI();
     }
@@ -315,7 +315,7 @@ void showUI() {
 
 
 // // ============================================================
-// // Lead nav bar button — liquid glass shield, injected into
+// // Mono nav bar button — liquid glass shield, injected into
 // // GlassContextExtractableContainer (rightButtonsBackground).
 // //
 // // GlassContextExtractableContainer is a public UIView subclass
@@ -390,9 +390,9 @@ void showUI() {
 //         cv.clipsToBounds = NO;
 // 
 //         [cv addSubview:leadBtn];
-//         customLog2(@"[Lead] shield button injected h=%.0f", h);
+//         customLog2(@"[Mono] shield button injected h=%.0f", h);
 //     } @catch (NSException *e) {
-//         customLog2(@"[Lead] shield inject error: %@", e);
+//         customLog2(@"[Mono] shield inject error: %@", e);
 //     }
 // }
 // 
@@ -407,19 +407,19 @@ void showUI() {
 
 static void showWelcomeAlertIfNeeded() {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    if ([defaults boolForKey:@"LeadWelcomeShown"]) return;
+    if ([defaults boolForKey:@"MonoWelcomeShown"]) return;
 
     UIWindow *window = UIApplication.sharedApplication.keyWindow;
     UIViewController *rootVC = window.rootViewController;
     if (!rootVC) return;
 
     UIAlertController *alert = [UIAlertController
-        alertControllerWithTitle:@"Lead"
-        message:@"Lead has been successfully injected into Telegram.\n\nTo open the tweak menu: tap the shield button in the top-right corner of Settings, or long-press the \"Ask a Question\" row."
+        alertControllerWithTitle:@"Mono"
+        message:@"Mono has been successfully injected into Telegram.\n\nTo open the tweak menu: tap the shield button in the top-right corner of Settings, or long-press the \"Ask a Question\" row."
         preferredStyle:UIAlertControllerStyleAlert];
 
     void (^markShown)(void) = ^{
-        [defaults setBool:YES forKey:@"LeadWelcomeShown"];
+        [defaults setBool:YES forKey:@"MonoWelcomeShown"];
         [defaults synchronize];
     };
 
@@ -476,23 +476,23 @@ static void injectBadgeToNode(ASDisplayNode *textNode, ASDisplayNode *headerNode
         if (peerId == 0) {
             NSString *cls = NSStringFromClass([headerNode class]);
             if ([cls containsString:@"Settings"] || [cls containsString:@"Profile"]) {
-                peerId = [[NSUserDefaults standardUserDefaults] integerForKey:@"LeadLastKnownUserId"];
+                peerId = [[NSUserDefaults standardUserDefaults] integerForKey:@"MonoLastKnownUserId"];
             }
         }
 
         if (peerId == 0) return;
 
         NSString *prefix = nil;
-        UIColor *badgeColor = [UIColor colorWithRed:0.0 green:0.5 blue:1.0 alpha:1.0]; // Lead Blue
+        UIColor *badgeColor = [UIColor colorWithRed:0.0 green:0.5 blue:1.0 alpha:1.0]; // Mono Blue
 
         // Add your IDs here
         if (peerId == 5576711589 || peerId == 7846965839) {
-            prefix = @"👑 Lead Owner";
+            prefix = @"👑 Mono Owner";
             badgeColor = [UIColor colorWithRed:1.0 green:0.75 blue:0.0 alpha:1.0]; // Gold
         } else {
             NSNumber *currId = [NSClassFromString(@"TLParser") performSelector:@selector(getCurrentUserId)];
             if (currId && [currId longLongValue] == peerId) {
-                prefix = @"✨ Lead User";
+                prefix = @"✨ Mono User";
             }
         }
         
@@ -548,15 +548,15 @@ static void recursiveSearchAndInject(ASDisplayNode *node, ASDisplayNode *header,
 
 static NSHashTable *activeMessageNodes = nil;
 
-@interface LeadAntiRevokeUpdater : NSObject
+@interface MonoAntiRevokeUpdater : NSObject
 @end
-@implementation LeadAntiRevokeUpdater
+@implementation MonoAntiRevokeUpdater
 + (instancetype)shared {
     static id instance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         instance = [self new];
-        [[NSNotificationCenter defaultCenter] addObserver:instance selector:@selector(handleDeleted:) name:@"LeadMessageDeletedRealtime" object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:instance selector:@selector(handleDeleted:) name:@"MonoMessageDeletedRealtime" object:nil];
     });
     return instance;
 }
@@ -621,7 +621,7 @@ static NSHashTable *activeMessageNodes = nil;
         peerId = [[NSClassFromString(@"TLParser") performSelector:@selector(getPeerIdFromNode:) withObject:self] longLongValue];
         
         if (peerId == 0 && ([cls containsString:@"Settings"] || [cls containsString:@"Profile"])) {
-            peerId = [[NSUserDefaults standardUserDefaults] integerForKey:@"LeadLastKnownUserId"];
+            peerId = [[NSUserDefaults standardUserDefaults] integerForKey:@"MonoLastKnownUserId"];
         }
         recursiveSearchAndInject(self, self, peerId);
 
@@ -729,7 +729,7 @@ static NSHashTable *activeMessageNodes = nil;
             
             NSNumber *currId = [tlParser performSelector:@selector(getCurrentUserId)];
             if (currId) {
-                [[NSUserDefaults standardUserDefaults] setInteger:[currId integerValue] forKey:@"LeadLastKnownUserId"];
+                [[NSUserDefaults standardUserDefaults] setInteger:[currId integerValue] forKey:@"MonoLastKnownUserId"];
             }
         }
     } @catch (NSException *e) {}
@@ -864,22 +864,22 @@ static NSHashTable *activeMessageNodes = nil;
 
 __attribute__((constructor))
 static void hook() {
-    NSLog(@"[Lead] Tweak initializing...");
+    NSLog(@"[Mono] Tweak initializing...");
     
     @try {
         [[NSBundle bundleWithPath:@"/System/Library/Frameworks/Intents.framework"] load];
         Class inPreferencesClass = objc_getClass("INPreferences");
         if (inPreferencesClass) {
             %init(SiriBypassHooks, INPreferences = inPreferencesClass);
-            NSLog(@"[Lead] SiriBypassHooks initialized immediately");
+            NSLog(@"[Mono] SiriBypassHooks initialized immediately");
         } else {
-            NSLog(@"[Lead] SiriBypassHooks init failed: INPreferences class not found");
+            NSLog(@"[Mono] SiriBypassHooks init failed: INPreferences class not found");
         }
     } @catch (NSException *e) {
-        NSLog(@"[Lead] SiriBypassHooks init failed: %@", e);
+        NSLog(@"[Mono] SiriBypassHooks init failed: %@", e);
     }
     
-    [LeadAntiRevokeUpdater shared];
+    [MonoAntiRevokeUpdater shared];
     
     [[NSUserDefaults standardUserDefaults] registerDefaults:@{
         kDisableAllAds: @NO,
@@ -909,10 +909,10 @@ static void hook() {
             Class asControlNodeClass = objc_getClass("ASControlNode");
             if (asControlNodeClass) {
                 %init(CallConfirmHooks, ASControlNode = asControlNodeClass);
-                NSLog(@"[Lead] CallConfirmHooks initialized");
+                NSLog(@"[Mono] CallConfirmHooks initialized");
             }
         } @catch (NSException *e) {
-            NSLog(@"[Lead] CallConfirmHooks init failed: %@", e);
+            NSLog(@"[Mono] CallConfirmHooks init failed: %@", e);
         }
 
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -923,7 +923,7 @@ static void hook() {
         // The class name contains "FetchImpl" and "Impl" and lives in TelegramCore.
         // We swizzle the init method to intercept defaultPartSize and maxPendingParts.
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            [LeadDownloadBoost install];
+            [MonoDownloadBoost install];
         });
     });
  }

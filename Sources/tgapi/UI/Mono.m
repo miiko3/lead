@@ -4,13 +4,13 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-#define TGLoc(key) [LeadLocalization localizedStringForKey:(key)]
+#define TGLoc(key) [MonoLocalization localizedStringForKey:(key)]
 
 // Announcements are fetched from this JSON file on GitHub
-static NSString *const kLeadAnnouncementsURL = @"https://raw.githubusercontent.com/w3ltyyy/lead/main/announcements.json";
-static NSString *const kLeadTweakVersion = @"1.3.9";
+static NSString *const kMonoAnnouncementsURL = @"https://raw.githubusercontent.com/miiko3/lead/main/announcements.json";
+static NSString *const kMonoTweakVersion = @"1.0.0";
 
-@interface Lead ()
+@interface Mono ()
 @property(nonatomic, strong) UITableView *tableView;
 @property(nonatomic, strong) NSString *cacheSize;
 @property(nonatomic, strong) UIView *announcementsContainer;
@@ -20,7 +20,7 @@ static NSString *const kLeadTweakVersion = @"1.3.9";
 - (NSString *)sizeOfUglyFileFixDirectory;
 @end
 
-@implementation Lead
+@implementation Mono
 
 - (void)viewDidLoad {
   self.isGhostModeExpanded = [[NSUserDefaults standardUserDefaults] boolForKey:kGhostDetailsToggle];
@@ -29,7 +29,7 @@ static NSString *const kLeadTweakVersion = @"1.3.9";
   [self setupIconAsHeader];
   [self setupFooterView];
   [self setupApplyButton];
-  self.title = @"Lead";
+  self.title = @"Mono";
 
   [self fetchAnnouncement];
 
@@ -42,7 +42,7 @@ static NSString *const kLeadTweakVersion = @"1.3.9";
   [[NSNotificationCenter defaultCenter]
       addObserver:self
          selector:@selector(didChangeFakeLocation)
-             name:@"LeadLocationChanged"
+             name:@"MonoLocationChanged"
            object:nil];
 }
 
@@ -56,10 +56,10 @@ static NSString *const kLeadTweakVersion = @"1.3.9";
   versionLabel.textAlignment = NSTextAlignmentCenter;
   versionLabel.numberOfLines = 0;
 
-  NSString *version = @"1.3.9";
-  NSString *build = @"103";
+  NSString *version = @"1.0.0";
+  NSString *build = @"1";
   versionLabel.text = [NSString
-      stringWithFormat:@"Lead Version %@ (Build %@)\n© 2026 Lead Team", version,
+      stringWithFormat:@"Mono Version %@ (Build %@)\n© 2026 Mono Team", version,
                        build];
 
   [footerView addSubview:versionLabel];
@@ -114,7 +114,7 @@ static NSString *const kLeadTweakVersion = @"1.3.9";
 
   // Logo Image
   NSData *imageData = [[NSData alloc]
-      initWithBase64EncodedString:CHOCOPNG
+      initWithBase64EncodedString:MONOPNG
                           options:NSDataBase64DecodingIgnoreUnknownCharacters];
   UIImageView *iconView =
       [[UIImageView alloc] initWithImage:[UIImage imageWithData:imageData]];
@@ -440,10 +440,10 @@ static NSString *const kLeadTweakVersion = @"1.3.9";
   }
 }
 
-#pragma mark - Lead Announcements
+#pragma mark - Mono Announcements
 
 - (void)fetchAnnouncement {
-  NSURL *url = [NSURL URLWithString:kLeadAnnouncementsURL];
+  NSURL *url = [NSURL URLWithString:kMonoAnnouncementsURL];
   NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url];
   req.timeoutInterval = 10;
   // Cache policy to ensure we get fresh data
@@ -879,10 +879,10 @@ typedef NS_ENUM(NSInteger, TABLE_VIEW_SECTIONS) {
   } else if (indexPath.section == CREDITS) {
     cell = [self normalCellFromTableView:tableView];
     if (indexPath.row == 0) {
-      cell.textLabel.text = @"Lead Team / w3ltyyy";
+      cell.textLabel.text = @"Mono Team / w3ltyyy";
       cell.detailTextLabel.text = @"Developer";
       cell.detailTextLabel.textColor = [UIColor lightGrayColor];
-      NSData *imageData = [[NSData alloc] initWithBase64EncodedString:CHOCOPNG options:NSDataBase64DecodingIgnoreUnknownCharacters];
+      NSData *imageData = [[NSData alloc] initWithBase64EncodedString:MONOPNG options:NSDataBase64DecodingIgnoreUnknownCharacters];
       UIImage *rawImage = [UIImage imageWithData:imageData];
       UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:CGSizeMake(40, 40)];
       UIImage *thumb = [renderer imageWithActions:^(UIGraphicsImageRendererContext *ctx) { [rawImage drawInRect:CGRectMake(0, 0, 40, 40)]; }];
@@ -1115,7 +1115,7 @@ typedef NS_ENUM(NSInteger, TABLE_VIEW_SECTIONS) {
 }
 
 - (void)showDebugLog {
-  NSString *logPath = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents/lead_debug.txt"];
+  NSString *logPath = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents/mono_debug.txt"];
   NSString *logContent = [NSString stringWithContentsOfFile:logPath encoding:NSUTF8StringEncoding error:nil];
 
   if (!logContent || logContent.length == 0) {
@@ -1191,7 +1191,7 @@ typedef NS_ENUM(NSInteger, TABLE_VIEW_SECTIONS) {
               handler:^(UIAlertAction *action) {
                 NSString *uglyFixDirectory = [NSTemporaryDirectory()
                     stringByAppendingPathComponent:
-                        @"LeadFileFixUsingSomeUglyHacks"];
+                        @"MonoFileFixUsingSomeUglyHacks"];
 
                 NSError *error = nil;
                 [[NSFileManager defaultManager]
@@ -1235,7 +1235,7 @@ typedef NS_ENUM(NSInteger, TABLE_VIEW_SECTIONS) {
               object:nil];
 
   [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                  name:@"LeadlocationChanged"
+                                                  name:@"MonolocationChanged"
                                                 object:nil];
 }
 

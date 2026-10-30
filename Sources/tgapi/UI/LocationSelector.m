@@ -130,7 +130,7 @@
   [[NSUserDefaults standardUserDefaults] synchronize];
 
   [[NSNotificationCenter defaultCenter]
-      postNotificationName:@"LeadLocationChanged"
+      postNotificationName:@"MonoLocationChanged"
                     object:nil];
 }
 
